@@ -1,24 +1,28 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Limpiando configuración de repositorios rotos..."
+echo "🔧 Limpiando repositorios rotos..."
+# Eliminar el repositorio problemático
 rm -f /etc/apt/sources.list.d/r2u.list 2>/dev/null
-rm -f /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-jammy.list 2>/dev/null
+rm -f /etc/apt/sources.list.d/deadsnakes*.list 2>/dev/null
+
+# Reiniciar configuración de apt
+rm -rf /var/lib/apt/lists/*
+apt-get clean
 
 echo "📦 Instalando dependencias del sistema..."
 apt-get update -qq
 apt-get install -qq -y \
-    software-properties-common \
     ffmpeg libsndfile1 build-essential \
     python3.10 python3.10-venv python3.10-dev \
-    aria2 sox
+    aria2 sox software-properties-common
 
 echo "🐍 Creando entorno virtual con Python 3.10..."
 python3.10 -m venv rvc-env
 source rvc-env/bin/activate
 
 echo "⬆️ Actualizando pip y setuptools..."
-pip install --upgrade pip==23.1.2 "setuptools<=80.6.0" wheel
+pip install --upgrade pip==23.1.2 "setuptools<=80.6.0" wheel --quiet
 
 echo "📦 Instalando PyTorch con CUDA 12.1..."
 pip install torch==2.3.1+cu121 torchaudio==2.3.1+cu121 torchvision==0.18.1+cu121 \
